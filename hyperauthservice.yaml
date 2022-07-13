@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hyperauth-external-service
+  namespace: api-gateway-system
+spec:
+  type: ExternalName
+  externalName: hyperauth.tmaxcloud.org

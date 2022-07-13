@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    createdTime: "2022-03-29T14:31:16.542039154+09:00"
+    creator: kubernetes-admin
+    deployment.kubernetes.io/revision: "32"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"labels":{"app":"oauth2-proxy-sample","chart":"oauth2-proxy-3.1.0","heritage":"Helm","release":"oauth2-proxy-example"},"name":"oauth2-proxy","namespace":"api-gateway-system"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"oauth2-proxy-sample","release":"oauth2-proxy-example"}},"template":{"metadata":{"labels":{"app":"oauth2-proxy-sample","release":"oauth2-proxy-example"}},"spec":{"containers":[{"args":["--http-address=0.0.0.0:4180","--cookie-secret=OQINaROshtE9TcZkNAm-5Zs2Pv3xaWytBmc5W7sPX7w=","--email-domain=*","--cookie-secure=false","--provider=keycloak-oidc","--client-id=oauth2proxy","--client-secret=120e67e1-4b0c-4434-a459-4f2f8b29afd0","--oidc-issuer-url=https://hyperauth.tmaxcloud.org/auth/realms/tmax","--redirect-url=https://auth.tmaxcloud.org/oauth2/callback","--cookie-domain=.tmaxcloud.org","--whitelist-domain=.tmaxcloud.org","--reverse-proxy=true","--upstream=static://202","--allowed-role=admin","--skip-provider-button=true","--set-authorization-header=true","--pass-authorization-header=true","--cookie-name=tmax-gateway"],"image":"quay.io/oauth2-proxy/oauth2-proxy:v7.2.0","imagePullPolicy":"IfNotPresent","livenessProbe":{"httpGet":{"path":"/ping","port":"http","scheme":"HTTP"},"initialDelaySeconds":0,"timeoutSeconds":1},"name":"oauth2-proxy","ports":[{"containerPort":4180,"name":"http","protocol":"TCP"}],"readinessProbe":{"httpGet":{"path":"/ping","port":"http","scheme":"HTTP"},"initialDelaySeconds":0,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":1},"resources":{},"volumeMounts":[{"mountPath":"/etc/oauth2_proxy","name":"configmain"}]}],"serviceAccountName":"api-gateway","tolerations":[],"volumes":[{"configMap":{"defaultMode":420,"name":"oauth2-proxy"},"name":"configmain"}]}}}}
+    updatedTime: "2022-03-29T14:31:16.542039154+09:00"
+    updater: kubernetes-admin
+  creationTimestamp: "2022-03-29T05:31:16Z"
+  generation: 32
+  labels:
+    app: oauth2-proxy-sample
+    chart: oauth2-proxy-3.1.0
+    heritage: Helm
+    release: oauth2-proxy-example
+  name: oauth2-proxy
+  namespace: api-gateway-system
+  resourceVersion: "368545560"
+  selfLink: /apis/apps/v1/namespaces/api-gateway-system/deployments/oauth2-proxy
+  uid: 6ac42e3c-ea15-4f82-a819-d6ef2e6ace26
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: oauth2-proxy-sample
+      release: oauth2-proxy-example
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: oauth2-proxy-sample
+        release: oauth2-proxy-example
+    spec:
+      containers:
+      - args:
+        - --http-address=0.0.0.0:4180
+        - --cookie-secret=OQINaROshtE9TcZkNAm-5Zs2Pv3xaWytBmc5W7sPX7w=
+        - --email-domain=*
+        - --provider=keycloak-oidc
+        - --client-id=hypercloud5
+        - --client-secret=b79feb6f-7b5a-45ee-9763-75dee82cb27f
+        - --oidc-issuer-url=https://hyperauth.tmaxcloud.org/auth/realms/tmax
+        - --redirect-url=https://auth.tmaxcloud.org/oauth2/callback
+        - --cookie-domain=.tmaxcloud.org
+        - --whitelist-domain=.tmaxcloud.org
+        - --reverse-proxy=true
+        - --upstream=static://202
+        - --allowed-role=admin
+        - --skip-provider-button=true
+        - --cookie-name=_oauth2_proxy
+        - --cookie-expire=1h
+        - --cookie-refresh=10m
+        - --cookie-secure=true
+        - --pass-access-token=true
+        - --pass-authorization-header=true
+        - --set-authorization-header=true
+        - --set-xauthrequest=true
+        - --alpha-config=/etc/oauth2_proxy/oauth2_proxy_alpha_config.yaml
+        image: quay.io/oauth2-proxy/oauth2-proxy:v7.2.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /ping
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: oauth2-proxy
+        ports:
+        - containerPort: 4180
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /ping
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/oauth2_proxy
+          name: configmain
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: api-gateway
+      serviceAccountName: api-gateway
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: oauth2-proxy
+        name: configmain
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2022-05-10T05:22:16Z"
+    lastUpdateTime: "2022-05-10T05:22:16Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2022-05-10T01:45:15Z"
+    lastUpdateTime: "2022-06-16T00:19:52Z"
+    message: Created new replica set "oauth2-proxy-5fbfdc5bd6"
+    reason: NewReplicaSetCreated
+    status: "True"
+    type: Progressing
+  observedGeneration: 32
+  readyReplicas: 1
+  replicas: 2
+  unavailableReplicas: 1
+  updatedReplicas: 1

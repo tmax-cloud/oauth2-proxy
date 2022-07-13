@@ -50,7 +50,12 @@ const (
 	oauthStartPath    = "/start"
 	oauthCallbackPath = "/callback"
 	authOnlyPath      = "/auth"
+	tAuthOnlyPath     = "/tauth"
 	userInfoPath      = "/userinfo"
+
+	hyperauthUserListPath  = "/user/list"
+	hyperauthGroupListPath = "/group/list"
+	tokenInfoPath          = "/tokeninfo"
 )
 
 var (
@@ -290,6 +295,7 @@ func (p *OAuthProxy) buildServeMux(proxyPrefix string) {
 	// We do this to allow users to have a short cache (via nginx) of the response to reduce the
 	// likelihood of multiple reuests trying to referesh sessions simultaneously.
 	r.Path(proxyPrefix + authOnlyPath).Handler(p.sessionChain.ThenFunc(p.AuthOnly))
+	r.Path(proxyPrefix + tAuthOnlyPath).Handler(p.sessionChain.ThenFunc(p.TauthOnly))
 
 	// This will register all of the paths under the proxy prefix, except the auth only path so that no cache headers
 	// are not applied.
@@ -311,6 +317,11 @@ func (p *OAuthProxy) buildProxySubrouter(s *mux.Router) {
 
 	// The userinfo endpoint needs to load sessions before handling the request
 	s.Path(userInfoPath).Handler(p.sessionChain.ThenFunc(p.UserInfo))
+
+	s.Path(hyperauthUserListPath).Handler(p.sessionChain.ThenFunc(p.HyperauthUserList))
+	s.Path(hyperauthGroupListPath).Handler(p.sessionChain.ThenFunc(p.HyperauthGroupList))
+	s.Path(tokenInfoPath).Handler(p.sessionChain.ThenFunc(p.TokenInfo))
+	//s.Path("/sign_out_h").HandlerFunc(p.HyperauthSignOut)
 }
 
 // buildPreAuthChain constructs a chain that should process every request before
@@ -655,21 +666,29 @@ func (p *OAuthProxy) UserInfo(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
+const keycloakOIDCProviderName = "Keycloak OIDC"
+
 // SignOut sends a response to clear the authentication cookie
 func (p *OAuthProxy) SignOut(rw http.ResponseWriter, req *http.Request) {
-	redirect, err := p.appDirector.GetRedirect(req)
+	//var redirect string
+	//if p.provider.Data().ProviderName == keycloakOIDCProviderName {
+	//	redirect = "https://hyperauth.tmaxcloud.org/auth/realms/tmax/protocol/openid-connect/logout?redirect_uri=http%3A%2F%2F192.168.8.112:4180/oauth2/sign_in"
+	//} else {
+	//	var err error
+	redirectUri, err := p.appDirector.GetRedirect(req)
 	if err != nil {
 		logger.Errorf("Error obtaining redirect: %v", err)
 		p.ErrorPage(rw, req, http.StatusInternalServerError, err.Error())
 		return
 	}
+	//}
 	err = p.ClearSessionCookie(rw, req)
 	if err != nil {
 		logger.Errorf("Error clearing session cookie: %v", err)
 		p.ErrorPage(rw, req, http.StatusInternalServerError, err.Error())
 		return
 	}
-	http.Redirect(rw, req, redirect, http.StatusFound)
+	http.Redirect(rw, req, redirectUri, http.StatusFound)
 }
 
 // OAuthStart starts the OAuth2 authentication flow
@@ -981,6 +1000,7 @@ func (p *OAuthProxy) getOAuthRedirectURI(req *http.Request) string {
 // Set-Cookie headers may be set on the response as a side-effect of calling this method.
 func (p *OAuthProxy) getAuthenticatedSession(rw http.ResponseWriter, req *http.Request) (*sessionsapi.SessionState, error) {
 	session := middlewareapi.GetRequestScope(req).Session
+	//session.
 
 	// Check this after loading the session so that if a valid session exists, we can add headers from it
 	if p.IsAllowedRequest(req) {
@@ -997,6 +1017,7 @@ func (p *OAuthProxy) getAuthenticatedSession(rw http.ResponseWriter, req *http.R
 		logger.Errorf("Error with authorization: %v", err)
 	}
 
+	//if invalidEmail || !authorized || session.IsExpired() {
 	if invalidEmail || !authorized {
 		logger.PrintAuthf(session.Email, req, logger.AuthFailure, "Invalid authorization via session: removing session %s", session)
 		// Invalid session, clear it

@@ -1,0 +1,93 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: oauth2-proxy
+  namespace: api-gateway-system
+data:
+  oauth2-proxy-alpha-config.yaml: |-
+    server:
+      BindAddress: "0.0.0.0:4180"
+    upstreamConfig:
+      proxyRawPath: true
+      upstreams:
+        - id: static
+          path: //
+          static: true
+          staticCode: 202
+    providers:
+      - provider: keycloak-oidc
+        id: keycloak-oidc
+        clientSecret: b79feb6f-7b5a-45ee-9763-75dee82cb27f
+        clientID: hypercloud5
+        oidcConfig:
+          issuerURL: https://hyperauth.tmaxcloud.org/auth/realms/tmax          
+          emailClaim: preferred_username
+          audienceClaims:
+            - aud
+          userIDClaim: preferred_username
+    injectResponseHeaders:
+      - name: Authorization
+        values:
+          - claim: access_token
+            prefix: "Bearer "
+      - name: X-Auth-Request-Access-Token
+        values:
+          - claim: access_token
+  # injectRequestHeaders:
+  #   - name: Authorization
+  #     values:
+  #       - claim: access_token
+  #         prefix: "Bearer "
+  #   - name: X-Auth-Request-Access-Token
+  #     values:
+  #       - claim: access_token
+
+  oauth2-proxy.cfg: |-
+    cookie_secret="OQINaROshtE9TcZkNAm-5Zs2Pv3xaWytBmc5W7sPX7w="
+    email_domains="*"
+    cookie_secure="true"
+    redirect_url="https://auth.tmaxcloud.org/oauth2/callback"
+    reverse_proxy="true"
+  # skip_provider_button="true"
+  # cookie_domain=".tmaxcloud.org"
+  #cookie_domain=".tmaxcloud.org"
+  #whitelist_domain=".tmaxcloud.org"
+  # http_address="0.0.0.0:4180"
+  # provider="keycloak-oidc"
+  # client_id="hypercloud5"
+  # client_secret="b79feb6f-7b5a-45ee-9763-75dee82cb27f"
+  # oidc_issuer_url="https://hyperauth.tmaxcloud.org/auth/realms/tmax"
+
+  # cookie_domain=".tmaxcloud.org"
+  # whitelist_domain=".tmaxcloud.org"
+  # upstream="static://202"
+  # reverse_proxy=true
+  # skip-provider-button=true
+  # cookie-name=_oauth2_proxy
+  # cookie-secure=true
+  # - --http-address=0.0.0.0:4180
+  # - --cookie-secret=OQINaROshtE9TcZkNAm-5Zs2Pv3xaWytBmc5W7sPX7w=
+  # - --email-domain=*
+  # - --provider=keycloak-oidc
+  # - --client-id=hypercloud5
+  # - --client-secret=b79feb6f-7b5a-45ee-9763-75dee82cb27f
+  # - --oidc-issuer-url=https://hyperauth.tmaxcloud.org/auth/realms/tmax
+  # - --redirect-url=https://auth.tmaxcloud.org/oauth2/callback
+  # - --cookie-domain=.tmaxcloud.org
+  # - --whitelist-domain=.tmaxcloud.org
+  # - --reverse-proxy=true
+  # - --upstream=static://202
+  # - --allowed-role=admin
+  # - --skip-provider-button=true
+  # - --cookie-name=_oauth2_proxy
+  # - --cookie-expire=1h
+  # - --cookie-refresh=10m
+  # - --cookie-secure=true
+  # - --pass-access-token=true
+  # - --pass-authorization-header=true
+  # - --set-authorization-header=true
+  # - --set-xauthrequest=true
+---
+
+---
+

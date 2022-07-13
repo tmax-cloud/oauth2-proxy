@@ -26,10 +26,11 @@ func MakeCookieFromOptions(req *http.Request, name string, value string, opts *o
 	}
 
 	c := &http.Cookie{
-		Name:     name,
-		Value:    value,
-		Path:     opts.Path,
-		Domain:   domain,
+		Name:   name,
+		Value:  value,
+		Path:   opts.Path,
+		Domain: domain,
+		//Expires: time.Time{},
 		Expires:  now.Add(expiration),
 		HttpOnly: opts.HTTPOnly,
 		Secure:   opts.Secure,

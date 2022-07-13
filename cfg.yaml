@@ -1,0 +1,23 @@
+--http-address=0.0.0.0:4180
+--metrics-address=0.0.0.0:44180
+--reverse-proxy=true
+--upstream=static://202
+--cookie-domain=.tmaxcloud.org
+--whitelist-domain=.tmaxcloud.org
+55         - --provider=keycloak-oidc
+56         - --email-domain=*
+57         - --redirect-url=https://oauth2.tmaxcloud.org/oauth2/callback
+58         - --oidc-issuer-url=https://hyperauth.tmaxcloud.org/auth/realms/tmax
+59         - --client-id=oauth2proxy
+60         - --client-secret=120e67e1-4b0c-4434-a459-4f2f8b29afd0
+61         - --allowed-role=adminddd
+62         - --allowed-role=admin
+63         - --skip-provider-button=true
+64         - --set-authorization-header=true
+65         - --pass-access-token=true
+66         - --pass-authorization-header=true
+67         - --set-authorization-header=true
+68         - --cookie-name=_oauth2_proxy
+69         - --cookie-secret=OQINaROshtE9TcZkNAm-5Zs2Pv3xaWytBmc5W7sPX7w=
+70         - --cookie-refresh=10m
+71         - --cookie-expire=1h
