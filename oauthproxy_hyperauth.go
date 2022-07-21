@@ -4,12 +4,15 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/apis/sessions"
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/logger"
+	"golang.org/x/oauth2"
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
 
 //func (p *OAuthProxy) getIss()
@@ -373,8 +376,13 @@ func (p *OAuthProxy) Token(rw http.ResponseWriter, req *http.Request) {
 	//
 	//json.NewEncoder(rw).Encode(newSession)
 
-	p.provider.RefreshSession(context.Background(), session)
-
+	//p.provider.RefreshSession(context.Background(), session)
+	err = p.refreshToken(context.Background(), session)
+	if err != nil {
+		logger.Errorf("Unable to decode jwt token segment. %v", err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	err = p.ClearSessionCookie(rw, req)
 	if err != nil {
 		logger.Errorf("Error clearing session cookie", err)
@@ -392,4 +400,48 @@ func (p *OAuthProxy) Token(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 	json.NewEncoder(rw).Encode(session)
 
+}
+
+func (p *OAuthProxy) refreshToken(ctx context.Context, s *sessions.SessionState) error {
+	//clientSecret, err := p.provider.(*providers.OIDCProvider).GetClientSecret()
+	//if err != nil {
+	//	return err
+	//}
+	providerInfo := p.provider.Data()
+
+	c := oauth2.Config{
+		ClientID: providerInfo.ClientID,
+		//ClientSecret: clientSecret,
+		ClientSecret: providerInfo.ClientSecret,
+		Endpoint: oauth2.Endpoint{
+			TokenURL: providerInfo.RedeemURL.String(),
+		},
+	}
+	t := &oauth2.Token{
+		RefreshToken: s.RefreshToken,
+		Expiry:       time.Now().Add(-time.Hour),
+	}
+	token, err := c.TokenSource(ctx, t).Token()
+	if err != nil {
+		return fmt.Errorf("failed to get token: %v", err)
+	}
+
+	s.AccessToken = token.AccessToken
+	s.RefreshToken = token.RefreshToken
+	s.IDToken = getIDToken(token)
+
+	s.CreatedAtNow()
+	s.SetExpiresOn(token.Expiry)
+
+	return nil
+}
+
+// getIDToken extracts an IDToken stored in the `Extra` fields of an
+// oauth2.Token
+func getIDToken(token *oauth2.Token) string {
+	idToken, ok := token.Extra("id_token").(string)
+	if !ok {
+		return ""
+	}
+	return idToken
 }

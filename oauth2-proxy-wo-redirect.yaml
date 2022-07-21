@@ -1,0 +1,14 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: oauth2-proxy-wo-redirect
+  namespace: api-gateway-system
+spec:
+  forwardAuth:
+    address: https://oauth2.tmaxcloud.org/oauth2/tauth
+    authResponseHeaders:
+    - Authorization
+    - X-Auth-Request-Access-Token
+    tls:
+      insecureSkipVerify: true
+    trustForwardHeader: true
