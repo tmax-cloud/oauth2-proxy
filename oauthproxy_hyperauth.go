@@ -374,6 +374,20 @@ func (p *OAuthProxy) Token(rw http.ResponseWriter, req *http.Request) {
 	//json.NewEncoder(rw).Encode(newSession)
 
 	p.provider.RefreshSession(context.Background(), session)
+
+	err = p.ClearSessionCookie(rw, req)
+	if err != nil {
+		logger.Errorf("Error clearing session cookie", err)
+		p.ErrorPage(rw, req, http.StatusInternalServerError, "clear sessions cookie failed")
+		return
+	}
+	err = p.SaveSession(rw, req, session)
+	if err != nil {
+		logger.Printf("Error saving session: %v", err)
+		p.ErrorPage(rw, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	rw.Header().Set("Content-Type", applicationJSON)
 	rw.WriteHeader(http.StatusOK)
 	json.NewEncoder(rw).Encode(session)
