@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"github.com/golang-jwt/jwt"
@@ -119,7 +120,6 @@ func (p *OAuthProxy) HyperauthUserList(rw http.ResponseWriter, req *http.Request
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	var decodedTokenMap map[string]interface{}
 	json.Unmarshal(tokenByteArr, &decodedTokenMap)
 	issuer := decodedTokenMap["iss"].(string)
@@ -200,10 +200,25 @@ func (p *OAuthProxy) TokenInfo(rw http.ResponseWriter, req *http.Request) {
 
 func (p *OAuthProxy) TauthOnly(rw http.ResponseWriter, req *http.Request) {
 	session, err := p.getAuthenticatedSession(rw, req)
+
 	if err != nil {
 		http.Error(rw, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
+	// get iss
+	tokenByteArr, err := jwt.DecodeSegment(strings.Split(session.AccessToken, ".")[1])
+	if err != nil {
+		logger.Errorf("Unable to decode jwt token segment. %v", err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	var decodedTokenMap map[string]interface{}
+	json.Unmarshal(tokenByteArr, &decodedTokenMap)
+	issuer := decodedTokenMap["iss"].(string)
+	//redirect := issuer + "/protocol/openid-connect/logout?redirect_uri=" + req.URL.Scheme + "%3A%2F%2F" + req.URL.Host + ":" + req.URL.Port() + "/oauth2/sign_in"
+	redirect := issuer + "/protocol/openid-connect/logout?redirect_uri=" + "http" + "%3A%2F%2F" + "192.168.8.112:4180" + "/oauth2/sign_in"
+
 	if session.IsExpired() {
 		err := p.ClearSessionCookie(rw, req)
 		if err != nil {
@@ -211,7 +226,8 @@ func (p *OAuthProxy) TauthOnly(rw http.ResponseWriter, req *http.Request) {
 			p.ErrorPage(rw, req, http.StatusInternalServerError, "clear sessions cookie failed")
 			return
 		}
-		http.Error(rw, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		http.Redirect(rw, req, redirect, http.StatusFound)
+		//http.Error(rw, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
 	//if session.IsExpired() {
@@ -266,3 +282,100 @@ func (p *OAuthProxy) TauthOnly(rw http.ResponseWriter, req *http.Request) {
 //	http.Redirect(rw, req, redirect, http.StatusFound)
 //
 //}
+
+func (p *OAuthProxy) Token(rw http.ResponseWriter, req *http.Request) {
+	session, err := p.getAuthenticatedSession(rw, req)
+	if err != nil {
+		http.Error(rw, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	//tokenByteArr, err := jwt.DecodeSegment(strings.Split(session.AccessToken, ".")[1])
+	//if err != nil {
+	//	logger.Errorf("Unable to decode jwt token segment. %v", err)
+	//	rw.WriteHeader(http.StatusInternalServerError)
+	//	return
+	//}
+	//var decodedTokenMap map[string]interface{}
+	//json.Unmarshal(tokenByteArr, &decodedTokenMap)
+	//issuer := decodedTokenMap["iss"].(string)
+	//hyperauthUrl := issuer + "/protocol/openid-connect/token"
+	//providerInfo := p.provider.Data()
+	//data := url.Values{}
+	//data.Set("client_id", providerInfo.ClientID)
+	//data.Set("client_secret", providerInfo.ClientSecret)
+	//data.Set("refresh_token", session.RefreshToken)
+	//data.Set("grant_type", "refresh_token")
+	//
+	////logger.Println("check providerInfo   ", providerInfo)
+	////refreshBody := map[string]string{
+	////	"client_id":     providerInfo.ClientID,
+	////	"client_secret": providerInfo.ClientSecret,
+	////	"refresh_token": session.RefreshToken,
+	////	"grant_type":    "refresh_token",
+	////}
+	////body, _ := json.Marshal(refreshBody)
+	////buff := bytes.NewBuffer(body)
+	////newReq, err := http.NewRequest(http.MethodPost, hyperauthUrl, buff)
+	//newReq, err := http.NewRequest(http.MethodPost, hyperauthUrl, strings.NewReader(data.Encode()))
+	//if err != nil {
+	//	logger.Errorf("Error clearing session cookie", err)
+	//	p.ErrorPage(rw, req, http.StatusInternalServerError, "failed to get token refresh")
+	//}
+	//newReq.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	//client := &http.Client{
+	//	Transport: &http.Transport{
+	//		TLSClientConfig: &tls.Config{
+	//			InsecureSkipVerify: true,
+	//		},
+	//	},
+	//}
+	//response, err := client.Do(newReq)
+	//if err != nil {
+	//	logger.Errorf("Error clearing session cookie", err)
+	//	p.ErrorPage(rw, req, http.StatusInternalServerError, "failed to get token refresh")
+	//}
+	//var tokenInfo map[string]interface{}
+	//logger.Println("check response body  ", response.Status)
+	//err = json.NewDecoder(response.Body).Decode(&tokenInfo)
+	//if err != nil {
+	//	logger.Println(err)
+	//}
+	//logger.Println("check token body  ", tokenInfo)
+	//err = p.ClearSessionCookie(rw, req)
+	//if err != nil {
+	//	logger.Errorf("Error clearing session cookie", err)
+	//	p.ErrorPage(rw, req, http.StatusInternalServerError, "clear sessions cookie failed")
+	//	return
+	//}
+	//
+	//user := "test@tmax.co.kr"
+	////newSession := &sessions.SessionState{User: user, Groups: p.basicAuthGroups}
+	//newSession := &sessions.SessionState{
+	//	CreatedAt:         nil,
+	//	ExpiresOn:         nil,
+	//	AccessToken:       tokenInfo["access_token"].(string),
+	//	IDToken:           tokenInfo["id_token"].(string),
+	//	RefreshToken:      tokenInfo["refresh_token"].(string),
+	//	Nonce:             nil,
+	//	Email:             "",
+	//	User:              user,
+	//	Groups:            nil,
+	//	PreferredUsername: "",
+	//}
+	//err = p.SaveSession(rw, req, newSession)
+	//if err != nil {
+	//	logger.Printf("Error saving session: %v", err)
+	//	p.ErrorPage(rw, req, http.StatusInternalServerError, err.Error())
+	//	return
+	//}
+	//rw.Header().Set("Content-Type", applicationJSON)
+	//rw.WriteHeader(http.StatusOK)
+	//
+	//json.NewEncoder(rw).Encode(newSession)
+
+	p.provider.RefreshSession(context.Background(), session)
+	rw.Header().Set("Content-Type", applicationJSON)
+	rw.WriteHeader(http.StatusOK)
+	json.NewEncoder(rw).Encode(session)
+
+}

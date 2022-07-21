@@ -321,6 +321,7 @@ func (p *OAuthProxy) buildProxySubrouter(s *mux.Router) {
 	s.Path(hyperauthUserListPath).Handler(p.sessionChain.ThenFunc(p.HyperauthUserList))
 	s.Path(hyperauthGroupListPath).Handler(p.sessionChain.ThenFunc(p.HyperauthGroupList))
 	s.Path(tokenInfoPath).Handler(p.sessionChain.ThenFunc(p.TokenInfo))
+	s.Path("/token").Handler(p.sessionChain.ThenFunc(p.Token))
 	//s.Path("/sign_out_h").HandlerFunc(p.HyperauthSignOut)
 }
 
@@ -821,6 +822,7 @@ func (p *OAuthProxy) OAuthCallback(rw http.ResponseWriter, req *http.Request) {
 	if !p.redirectValidator.IsValidRedirect(appRedirect) {
 		appRedirect = "/"
 	}
+	//appRedirect = "/oauth2/tokeninfo"
 
 	// set cookie, or deny
 	authorized, err := p.provider.Authorize(req.Context(), session)
