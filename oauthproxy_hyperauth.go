@@ -183,22 +183,38 @@ func (p *OAuthProxy) TokenInfo(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// get playload from accesstoken
 	tokenByteArr, err := jwt.DecodeSegment(strings.Split(session.AccessToken, ".")[1])
 	var decodedTokenMap map[string]interface{}
 	json.Unmarshal(tokenByteArr, &decodedTokenMap)
 
-	CookieSessionInfo := struct {
-		//IsExpired   bool                   `json:"isExpired"`
-		SessionInfo *sessions.SessionState `json:"sessionInfo"`
-		Token       map[string]interface{} `json:"token"`
+	tokenInfo := struct {
+		Iss               string        `json:"iss"`
+		Exp               float64       `json:"exp"`
+		PreferredUsername string        `json:"preferred_username"`
+		Email             string        `json:"email"`
+		Group             []interface{} `json:"group"`
 	}{
-		//IsExpired:   session.IsExpired(),
-		SessionInfo: session,
-		Token:       decodedTokenMap,
+		Iss:               decodedTokenMap["iss"].(string),
+		Exp:               decodedTokenMap["exp"].(float64),
+		PreferredUsername: decodedTokenMap["preferred_username"].(string),
+		Email:             decodedTokenMap["email"].(string),
+		Group:             decodedTokenMap["group"].([]interface{}),
 	}
+
+	//CookieSessionInfo := struct {
+	//	//IsExpired   bool                   `json:"isExpired"`
+	//	//SessionInfo *sessions.SessionState `json:"sessionInfo"`
+	//	TokenInfo map[string]interface{} `json:"tokenInfo"`
+	//}{
+	//	//IsExpired:   session.IsExpired(),
+	//	//SessionInfo: session,
+	//	TokenInfo: decodedTokenMap,
+	//}
 	rw.Header().Set("Content-Type", applicationJSON)
 	rw.WriteHeader(http.StatusOK)
-	json.NewEncoder(rw).Encode(CookieSessionInfo)
+	//json.NewEncoder(rw).Encode(CookieSessionInfo)
+	json.NewEncoder(rw).Encode(tokenInfo)
 }
 
 func (p *OAuthProxy) TauthOnly(rw http.ResponseWriter, req *http.Request) {
@@ -398,7 +414,7 @@ func (p *OAuthProxy) Token(rw http.ResponseWriter, req *http.Request) {
 
 	rw.Header().Set("Content-Type", applicationJSON)
 	rw.WriteHeader(http.StatusOK)
-	json.NewEncoder(rw).Encode(session)
+	//?json.NewEncoder(rw).Encode({})
 
 }
 
@@ -421,6 +437,7 @@ func (p *OAuthProxy) refreshToken(ctx context.Context, s *sessions.SessionState)
 		RefreshToken: s.RefreshToken,
 		Expiry:       time.Now().Add(-time.Hour),
 	}
+
 	token, err := c.TokenSource(ctx, t).Token()
 	if err != nil {
 		return fmt.Errorf("failed to get token: %v", err)
