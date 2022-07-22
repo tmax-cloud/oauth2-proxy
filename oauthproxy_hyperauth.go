@@ -414,7 +414,7 @@ func (p *OAuthProxy) Token(rw http.ResponseWriter, req *http.Request) {
 
 	rw.Header().Set("Content-Type", applicationJSON)
 	rw.WriteHeader(http.StatusOK)
-	//?json.NewEncoder(rw).Encode({})
+	json.NewEncoder(rw).Encode(session.IDToken)
 
 }
 
