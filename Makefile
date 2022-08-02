@@ -2,10 +2,11 @@ GO ?= go
 GOLANGCILINT ?= golangci-lint
 
 BINARY := oauth2-proxy
-VERSION ?= $(shell git describe --always --dirty --tags 2>/dev/null || echo "undefined")
+#VERSION ?= $(shell git describe --always --dirty --tags 2>/dev/null || echo "undefined")
+VERSION ?= $(shell git tag | sort -V | tail -1 || echo "undefined")
 # Allow to override image registry.
 #REGISTRY ?= quay.io/oauth2-proxy
-REGISTRY ?= docker.io/jisnow
+REGISTRY ?= docker.io/tmaxcloudck
 .NOTPARALLEL:
 
 GO_MAJOR_VERSION = $(shell $(GO) version | cut -c 14- | cut -d' ' -f1 | cut -d'.' -f1)
