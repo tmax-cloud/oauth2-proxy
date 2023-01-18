@@ -236,7 +236,8 @@ func (p *OAuthProxy) TauthOnly(rw http.ResponseWriter, req *http.Request) {
 	json.Unmarshal(tokenByteArr, &decodedTokenMap)
 	issuer := decodedTokenMap["iss"].(string)
 	//redirect := issuer + "/protocol/openid-connect/logout?redirect_uri=" + req.URL.Scheme + "%3A%2F%2F" + req.URL.Host + ":" + req.URL.Port() + "/oauth2/sign_in"
-	redirect := issuer + "/protocol/openid-connect/logout?redirect_uri=" + "http" + "%3A%2F%2F" + "192.168.8.112:4180" + "/oauth2/sign_in"
+	redirect := issuer + "/protocol/openid-connect/logout"
+	//redirect := issuer + "/protocol/openid-connect/logout?redirect_uri=" + "http" + "%3A%2F%2F" + "192.168.8.112:4180" + "/oauth2/sign_in"
 
 	if session.IsExpired() {
 		err := p.ClearSessionCookie(rw, req)
