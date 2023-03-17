@@ -1,3 +1,7 @@
+# how to build
+# make docker-builder REGISTRY=192.168.9.12:5000 VERSION=v1.0 
+# make docker-push REGISTRY=192.168.9.12:5000 VERSION=v1.0 
+# docker-buildx rm multiarch-builder
 GO ?= go
 GOLANGCILINT ?= golangci-lint
 
@@ -44,9 +48,9 @@ $(BINARY):
 DOCKER_BUILD_PLATFORM ?= linux/amd64,linux/arm64,linux/ppc64le,linux/arm/v6,linux/arm64/v7
 DOCKER_BUILD_RUNTIME_IMAGE ?= alpine:3.15
 DOCKER_BUILDX_ARGS ?= --build-arg RUNTIME_IMAGE=${DOCKER_BUILD_RUNTIME_IMAGE}
-DOCKER_BUILDX := docker buildx build ${DOCKER_BUILDX_ARGS} --build-arg VERSION=${VERSION}
+DOCKER_BUILDX := docker-buildx build ${DOCKER_BUILDX_ARGS} --build-arg VERSION=${VERSION}
 DOCKER_BUILDX_X_PLATFORM := $(DOCKER_BUILDX) --platform ${DOCKER_BUILD_PLATFORM}
-DOCKER_BUILDX_PUSH := docker buildx build --push ${DOCKER_BUILDX_ARGS} --build-arg VERSION=${VERSION}
+DOCKER_BUILDX_PUSH := docker-buildx build --push ${DOCKER_BUILDX_ARGS} --build-arg VERSION=${VERSION}
 DOCKER_BUILDX_PUSH_X_PLATFORM := $(DOCKER_BUILDX_PUSH) --platform ${DOCKER_BUILD_PLATFORM}
 
 .PHONY: docker
@@ -84,7 +88,7 @@ docker-push-all: docker-push
 # ref. https://gurumee92.tistory.com/311
 .PHONY: docker-builder
 docker-builder:
-	docker buildx create --name multiarch-builder --user
+	docker-buildx create --name multiarch-builder --use
 
 .PHONY: generate
 generate:
