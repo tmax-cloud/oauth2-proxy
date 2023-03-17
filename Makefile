@@ -90,6 +90,10 @@ docker-push-all: docker-push
 docker-builder:
 	docker-buildx create --name multiarch-builder --use
 
+.PHONY: docker-builder-private
+docker-builder-private:
+	docker-buildx create --name multiarch-builder --use --config=buildxkitd.toml
+
 .PHONY: generate
 generate:
 	go generate ./pkg/...
