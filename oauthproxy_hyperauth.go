@@ -189,9 +189,9 @@ func (p *OAuthProxy) TokenInfo(rw http.ResponseWriter, req *http.Request) {
 	var decodedTokenMap map[string]interface{}
 	json.Unmarshal(tokenByteArr, &decodedTokenMap)
 
-	if decodedTokenMap["email"] == nil {
-		decodedTokenMap["email"] = decodedTokenMap["preferred_username"]
-	}
+	// [ims][300246] username must equla 'preferred_username', not 'email'
+	// because we do not use email for hypercloud
+	decodedTokenMap["email"] = decodedTokenMap["preferred_username"]
 
 	tokenInfo := struct {
 		Iss               string        `json:"iss"`
