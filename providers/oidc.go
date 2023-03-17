@@ -75,7 +75,8 @@ func (p *OIDCProvider) Redeem(ctx context.Context, redirectURL, code, codeVerifi
 func (p *OIDCProvider) EnrichSession(ctx context.Context, s *sessions.SessionState) error {
 	// If a mandatory email wasn't set, error at this point.
 	if s.Email == "" {
-		return errors.New("neither the id_token nor the profileURL set an email")
+		s.Email = s.PreferredUsername
+		// return errors.New("neither the id_token nor the profileURL set an email")
 	}
 	return nil
 }
