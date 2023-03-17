@@ -5,14 +5,15 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/golang-jwt/jwt"
-	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/apis/sessions"
-	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/logger"
-	"golang.org/x/oauth2"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/golang-jwt/jwt"
+	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/apis/sessions"
+	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/logger"
+	"golang.org/x/oauth2"
 )
 
 //func (p *OAuthProxy) getIss()
@@ -187,6 +188,10 @@ func (p *OAuthProxy) TokenInfo(rw http.ResponseWriter, req *http.Request) {
 	tokenByteArr, err := jwt.DecodeSegment(strings.Split(session.AccessToken, ".")[1])
 	var decodedTokenMap map[string]interface{}
 	json.Unmarshal(tokenByteArr, &decodedTokenMap)
+
+	if decodedTokenMap["email"] == nil {
+		decodedTokenMap["email"] = decodedTokenMap["preferred_username"]
+	}
 
 	tokenInfo := struct {
 		Iss               string        `json:"iss"`
