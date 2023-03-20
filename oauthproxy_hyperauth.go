@@ -191,7 +191,13 @@ func (p *OAuthProxy) TokenInfo(rw http.ResponseWriter, req *http.Request) {
 
 	// [ims][300246] username must equla 'preferred_username', not 'email'
 	// because we do not use email for hypercloud
-	decodedTokenMap["email"] = decodedTokenMap["preferred_username"]
+	// decodedTokenMap["email"] = decodedTokenMap["preferred_username"]
+	var email string
+	if decodedTokenMap["email"] == nil {
+		email = ""
+	} else {
+		email = decodedTokenMap["email"].(string)
+	}
 
 	tokenInfo := struct {
 		Iss               string        `json:"iss"`
@@ -203,7 +209,7 @@ func (p *OAuthProxy) TokenInfo(rw http.ResponseWriter, req *http.Request) {
 		Iss:               decodedTokenMap["iss"].(string),
 		Exp:               decodedTokenMap["exp"].(float64),
 		PreferredUsername: decodedTokenMap["preferred_username"].(string),
-		Email:             decodedTokenMap["email"].(string),
+		Email:             email,
 		Group:             decodedTokenMap["group"].([]interface{}),
 	}
 
