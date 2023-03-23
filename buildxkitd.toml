@@ -1,0 +1,4 @@
+insecure-entitlements = [ "192.168.9.12:5000" ]
+
+[registry."192.168.9.12:5000"]
+  http = true

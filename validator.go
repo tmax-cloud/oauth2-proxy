@@ -87,7 +87,8 @@ func newValidatorImpl(domains []string, usersFile string,
 
 	validator := func(email string) (valid bool) {
 		if email == "" {
-			return
+			// [IMS][300246] To allow no-email accounts to log in
+			return true
 		}
 		email = strings.ToLower(email)
 		valid = isEmailValidWithDomains(email, domains)
