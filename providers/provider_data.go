@@ -273,9 +273,9 @@ func (p *ProviderData) buildSessionFromClaims(rawIDToken, accessToken string) (*
 		return nil, err
 	}
 
-	if verifyEmail && exists && !verified {
-		return nil, fmt.Errorf("email in id_token (%s) isn't verified", ss.Email)
-	}
+	// if verifyEmail && exists && !verified {
+	// 	return nil, fmt.Errorf("email in id_token (%s) isn't verified", ss.Email)
+	// }
 
 	return ss, nil
 }
