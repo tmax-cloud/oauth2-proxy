@@ -88,11 +88,11 @@ docker-push-all: docker-push
 # ref. https://gurumee92.tistory.com/311
 .PHONY: docker-builder
 docker-builder:
-	docker-buildx create --name multiarch-builder --use
+	docker buildx create --name multiarch-builder --use
 
 .PHONY: docker-builder-private
 docker-builder-private:
-	docker-buildx create --name multiarch-builder --use --config=buildxkitd.toml
+	docker buildx create --name multiarch-builder --use --config=buildxkitd.toml
 
 .PHONY: generate
 generate:
