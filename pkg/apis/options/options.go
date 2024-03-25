@@ -21,6 +21,7 @@ type Options struct {
 	ProxyPrefix        string   `flag:"proxy-prefix" cfg:"proxy_prefix"`
 	PingPath           string   `flag:"ping-path" cfg:"ping_path"`
 	PingUserAgent      string   `flag:"ping-user-agent" cfg:"ping_user_agent"`
+	ReadyPath          string   `flag:"ready-path" cfg:"ready_path"`
 	ReverseProxy       bool     `flag:"reverse-proxy" cfg:"reverse_proxy"`
 	RealClientIPHeader string   `flag:"real-client-ip-header" cfg:"real_client_ip_header"`
 	TrustedIPs         []string `flag:"trusted-ip" cfg:"trusted_ips"`
@@ -50,6 +51,7 @@ type Options struct {
 
 	Providers Providers `cfg:",internal"`
 
+	APIRoutes             []string `flag:"api-route" cfg:"api_routes"`
 	SkipAuthRegex         []string `flag:"skip-auth-regex" cfg:"skip_auth_regex"`
 	SkipAuthRoutes        []string `flag:"skip-auth-route" cfg:"skip_auth_routes"`
 	SkipJwtBearerTokens   bool     `flag:"skip-jwt-bearer-tokens" cfg:"skip_jwt_bearer_tokens"`
@@ -95,6 +97,7 @@ func NewOptions() *Options {
 		ProxyPrefix:        "/oauth2",
 		Providers:          providerDefaults(),
 		PingPath:           "/ping",
+		ReadyPath:          "/ready",
 		RealClientIPHeader: "X-Real-IP",
 		ForceHTTPS:         false,
 		Cookie:             cookieDefaults(),
@@ -115,7 +118,8 @@ func NewFlagSet() *pflag.FlagSet {
 	flagSet.Bool("force-https", false, "force HTTPS redirect for HTTP requests")
 	flagSet.String("redirect-url", "", "the OAuth Redirect URL. ie: \"https://internalapp.yourcompany.com/oauth2/callback\"")
 	flagSet.StringSlice("skip-auth-regex", []string{}, "(DEPRECATED for --skip-auth-route) bypass authentication for requests path's that match (may be given multiple times)")
-	flagSet.StringSlice("skip-auth-route", []string{}, "bypass authentication for requests that match the method & path. Format: method=path_regex OR path_regex alone for all methods")
+	flagSet.StringSlice("skip-auth-route", []string{}, "bypass authentication for requests that match the method & path. Format: method=path_regex OR method!=path_regex. For all methods: path_regex OR !=path_regex")
+	flagSet.StringSlice("api-route", []string{}, "return HTTP 401 instead of redirecting to authentication server if token is not valid. Format: path_regex")
 	flagSet.Bool("skip-provider-button", false, "will skip sign-in-page to directly reach the next step: oauth/start")
 	flagSet.Bool("skip-auth-preflight", false, "will skip authentication for OPTIONS requests")
 	flagSet.Bool("ssl-insecure-skip-verify", false, "skip validation of certificates presented when using HTTPS providers")
@@ -131,6 +135,7 @@ func NewFlagSet() *pflag.FlagSet {
 	flagSet.String("proxy-prefix", "/oauth2", "the url root path that this proxy should be nested under (e.g. /<oauth2>/sign_in)")
 	flagSet.String("ping-path", "/ping", "the ping endpoint that can be used for basic health checks")
 	flagSet.String("ping-user-agent", "", "special User-Agent that will be used for basic health checks")
+	flagSet.String("ready-path", "/ready", "the ready endpoint that can be used for deep health checks")
 	flagSet.String("session-store-type", "cookie", "the session storage provider to use")
 	flagSet.Bool("session-cookie-minimal", false, "strip OAuth tokens from cookie session stores if they aren't needed (cookie session store only)")
 	flagSet.String("redis-connection-url", "", "URL of redis server for redis session storage (eg: redis://HOST[:PORT])")
@@ -143,7 +148,7 @@ func NewFlagSet() *pflag.FlagSet {
 	flagSet.StringSlice("redis-sentinel-connection-urls", []string{}, "List of Redis sentinel connection URLs (eg redis://HOST[:PORT]). Used in conjunction with --redis-use-sentinel")
 	flagSet.Bool("redis-use-cluster", false, "Connect to redis cluster. Must set --redis-cluster-connection-urls to use this feature")
 	flagSet.StringSlice("redis-cluster-connection-urls", []string{}, "List of Redis cluster connection URLs (eg redis://HOST[:PORT]). Used in conjunction with --redis-use-cluster")
-
+	flagSet.Int("redis-connection-idle-timeout", 0, "Redis connection idle timeout seconds, if Redis timeout option is non-zero, the --redis-connection-idle-timeout must be less then Redis timeout option")
 	flagSet.String("signature-key", "", "GAP-Signature request signature key (algorithm:secretkey)")
 	flagSet.Bool("gcp-healthchecks", false, "Enable GCP/GKE healthcheck endpoints")
 

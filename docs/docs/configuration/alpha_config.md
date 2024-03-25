@@ -164,6 +164,7 @@ They may change between releases without notice.
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `tenant` | _string_ | Tenant directs to a tenant-specific or common (tenant-independent) endpoint<br/>Default value is 'common' |
+| `graphGroupField` | _string_ | GraphGroupField configures the group field to be used when building the groups list from Microsoft Graph<br/>Default value is 'id' |
 
 ### BitbucketOptions
 
@@ -235,6 +236,7 @@ Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 | `group` | _[]string_ | Groups sets restrict logins to members of this google group |
 | `adminEmail` | _string_ | AdminEmail is the google admin to impersonate for api calls |
 | `serviceAccountJson` | _string_ | ServiceAccountJSON is the path to the service account json credentials |
+| `useApplicationDefaultCredentials` | _bool_ | UseApplicationDefaultCredentials is a boolean whether to use Application Default Credentials instead of a ServiceAccountJSON |
 
 ### Header
 
@@ -306,7 +308,7 @@ the caller provides it, and no value will be sent otherwise.
 
 Examples:
 
-A parameter whose value is fixed
+# A parameter whose value is fixed
 
 ```
 name: organization
@@ -354,8 +356,9 @@ as backslash is not considered to be an escape character.  Alternatively
 use the "chomped block" format `|-`:
 
 ```
-- pattern: |-
+  - pattern: |-
     ^[^@]*@example\.com$
+
 ```
 
 The hyphen is important, a `|` block would have a trailing newline
@@ -419,7 +422,7 @@ Provider holds all configuration for a single provider
 | `validateURL` | _string_ | ValidateURL is the access token validation endpoint |
 | `scope` | _string_ | Scope is the OAuth scope specification |
 | `allowedGroups` | _[]string_ | AllowedGroups is a list of restrict logins to members of this group |
-| `force_code_challenge_method` | _string_ | The forced code challenge method |
+| `code_challenge_method` | _string_ | The code challenge method |
 
 ### ProviderType
 #### (`string` alias)
@@ -478,6 +481,7 @@ as well as an optional minimal TLS version that is acceptable.
 | `Key` | _[SecretSource](#secretsource)_ | Key is the TLS key data to use.<br/>Typically this will come from a file. |
 | `Cert` | _[SecretSource](#secretsource)_ | Cert is the TLS certificate data to use.<br/>Typically this will come from a file. |
 | `MinVersion` | _string_ | MinVersion is the minimal TLS version that is acceptable.<br/>E.g. Set to "TLS1.3" to select TLS version 1.3 |
+| `CipherSuites` | _[]string_ | CipherSuites is a list of TLS cipher suites that are allowed.<br/>E.g.:<br/>- TLS_RSA_WITH_RC4_128_SHA<br/>- TLS_RSA_WITH_AES_256_GCM_SHA384<br/>If not specified, the default Go safe cipher list is used.<br/>List of valid cipher suites can be found in the [crypto/tls documentation](https://pkg.go.dev/crypto/tls#pkg-constants). |
 
 ### URLParameterRule
 

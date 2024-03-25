@@ -2,7 +2,6 @@ package validation
 
 import (
 	"crypto"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"strings"
@@ -64,7 +63,7 @@ func TestGoogleGroupOptions(t *testing.T) {
 
 	expected := errorMsg([]string{
 		"missing setting: google-admin-email",
-		"missing setting: google-service-account-json"})
+		"missing setting: google-service-account-json or google-use-application-default-credentials"})
 	assert.Equal(t, expected, err.Error())
 }
 
@@ -77,7 +76,7 @@ func TestGoogleGroupInvalidFile(t *testing.T) {
 	assert.NotEqual(t, nil, err)
 
 	expected := errorMsg([]string{
-		"invalid Google credentials file: file_doesnt_exist.json",
+		"Google credentials file not found: file_doesnt_exist.json",
 	})
 	assert.Equal(t, expected, err.Error())
 }
@@ -205,7 +204,7 @@ func TestRealClientIPHeader(t *testing.T) {
 }
 
 func TestProviderCAFilesError(t *testing.T) {
-	file, err := ioutil.TempFile("", "absent.*.crt")
+	file, err := os.CreateTemp("", "absent.*.crt")
 	assert.NoError(t, err)
 	assert.NoError(t, file.Close())
 	assert.NoError(t, os.Remove(file.Name()))

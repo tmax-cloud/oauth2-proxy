@@ -16,7 +16,7 @@ REGISTRY ?= docker.io/tmaxcloudck
 GO_MAJOR_VERSION = $(shell $(GO) version | cut -c 14- | cut -d' ' -f1 | cut -d'.' -f1)
 GO_MINOR_VERSION = $(shell $(GO) version | cut -c 14- | cut -d' ' -f1 | cut -d'.' -f2)
 MINIMUM_SUPPORTED_GO_MAJOR_VERSION = 1
-MINIMUM_SUPPORTED_GO_MINOR_VERSION = 15
+MINIMUM_SUPPORTED_GO_MINOR_VERSION = 19
 GO_VERSION_VALIDATION_ERR_MSG = Golang version is not supported, please update to at least $(MINIMUM_SUPPORTED_GO_MAJOR_VERSION).$(MINIMUM_SUPPORTED_GO_MINOR_VERSION)
 
 ifeq ($(COVER),true)
@@ -45,8 +45,8 @@ build: validate-go-version clean $(BINARY)
 $(BINARY):
 	CGO_ENABLED=0 $(GO) build -a -installsuffix cgo -ldflags="-X main.VERSION=${VERSION}" -o $@ github.com/oauth2-proxy/oauth2-proxy/v7
 
-DOCKER_BUILD_PLATFORM ?= linux/amd64,linux/arm64,linux/ppc64le,linux/arm/v6,linux/arm64/v7
-DOCKER_BUILD_RUNTIME_IMAGE ?= alpine:3.15
+DOCKER_BUILD_PLATFORM ?= linux/amd64,linux/ppc64le,linux/arm/v6,linux/arm/v8
+DOCKER_BUILD_RUNTIME_IMAGE ?= alpine:3.17.2
 DOCKER_BUILDX_ARGS ?= --build-arg RUNTIME_IMAGE=${DOCKER_BUILD_RUNTIME_IMAGE}
 DOCKER_BUILDX := docker-buildx build ${DOCKER_BUILDX_ARGS} --build-arg VERSION=${VERSION}
 DOCKER_BUILDX_X_PLATFORM := $(DOCKER_BUILDX) --platform ${DOCKER_BUILD_PLATFORM}

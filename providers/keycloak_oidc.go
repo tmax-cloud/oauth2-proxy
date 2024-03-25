@@ -17,7 +17,9 @@ type KeycloakOIDCProvider struct {
 
 // NewKeycloakOIDCProvider makes a KeycloakOIDCProvider using the ProviderData
 func NewKeycloakOIDCProvider(p *ProviderData, opts options.KeycloakOptions) *KeycloakOIDCProvider {
-	p.ProviderName = keycloakOIDCProviderName
+	p.setProviderDefaults(providerDefaults{
+		name: keycloakOIDCProviderName,
+	})
 
 	provider := &KeycloakOIDCProvider{
 		OIDCProvider: &OIDCProvider{
@@ -41,6 +43,21 @@ func (p *KeycloakOIDCProvider) addAllowedRoles(roles []string) {
 	for _, role := range roles {
 		p.AllowedGroups[formatRole(role)] = struct{}{}
 	}
+}
+
+// CreateSessionFromToken converts Bearer IDTokens into sessions
+func (p *KeycloakOIDCProvider) CreateSessionFromToken(ctx context.Context, token string) (*sessions.SessionState, error) {
+	ss, err := p.OIDCProvider.CreateSessionFromToken(ctx, token)
+	if err != nil {
+		return nil, fmt.Errorf("could not create session from token: %v", err)
+	}
+
+	// Extract custom keycloak roles and enrich session
+	if err := p.extractRoles(ctx, ss); err != nil {
+		return nil, err
+	}
+
+	return ss, nil
 }
 
 // EnrichSession is called after Redeem to allow providers to enrich session fields
@@ -109,20 +126,21 @@ func (p *KeycloakOIDCProvider) getAccessClaims(ctx context.Context, s *sessions.
 // the format `client:role`.
 //
 // ResourceAccess format:
-// "resource_access": {
-//   "clientA": {
-//     "roles": [
-//       "roleA"
-//     ]
-//   },
-//   "clientB": {
-//     "roles": [
-//       "roleA",
-//       "roleB",
-//       "roleC"
-//     ]
-//   }
-// }
+//
+//	"resource_access": {
+//	  "clientA": {
+//	    "roles": [
+//	      "roleA"
+//	    ]
+//	  },
+//	  "clientB": {
+//	    "roles": [
+//	      "roleA",
+//	      "roleB",
+//	      "roleC"
+//	    ]
+//	  }
+//	}
 func getClientRoles(claims *accessClaims) []string {
 	var clientRoles []string
 	for clientName, access := range claims.ResourceAccess {

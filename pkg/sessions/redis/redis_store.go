@@ -5,14 +5,14 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/apis/options"
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/apis/sessions"
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/logger"
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/sessions/persistence"
+	"github.com/redis/go-redis/v9"
 )
 
 // SessionStore is an implementation of the persistence.Store
@@ -70,6 +70,12 @@ func (store *SessionStore) Lock(key string) sessions.Lock {
 	return store.Client.Lock(key)
 }
 
+// VerifyConnection verifies the redis connection is valid and the
+// server is responsive
+func (store *SessionStore) VerifyConnection(ctx context.Context) error {
+	return store.Client.Ping(ctx)
+}
+
 // NewRedisClient makes a redis.Client (either standalone, sentinel aware, or
 // redis cluster)
 func NewRedisClient(opts options.RedisStoreOptions) (Client, error) {
@@ -104,6 +110,7 @@ func buildSentinelClient(opts options.RedisStoreOptions) (Client, error) {
 		SentinelPassword: opts.SentinelPassword,
 		Password:         opts.Password,
 		TLSConfig:        opt.TLSConfig,
+		ConnMaxIdleTime:  time.Duration(opts.IdleTimeout) * time.Second,
 	})
 	return newClient(client), nil
 }
@@ -120,9 +127,10 @@ func buildClusterClient(opts options.RedisStoreOptions) (Client, error) {
 	}
 
 	client := redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs:     addrs,
-		Password:  opts.Password,
-		TLSConfig: opt.TLSConfig,
+		Addrs:           addrs,
+		Password:        opts.Password,
+		TLSConfig:       opt.TLSConfig,
+		ConnMaxIdleTime: time.Duration(opts.IdleTimeout) * time.Second,
 	})
 	return newClusterClient(client), nil
 }
@@ -142,6 +150,8 @@ func buildStandaloneClient(opts options.RedisStoreOptions) (Client, error) {
 	if err := setupTLSConfig(opts, opt); err != nil {
 		return nil, err
 	}
+
+	opt.ConnMaxIdleTime = time.Duration(opts.IdleTimeout) * time.Second
 
 	client := redis.NewClient(opt)
 	return newClient(client), nil
@@ -166,7 +176,7 @@ func setupTLSConfig(opts options.RedisStoreOptions, opt *redis.Options) error {
 		if rootCAs == nil {
 			rootCAs = x509.NewCertPool()
 		}
-		certs, err := ioutil.ReadFile(opts.CAPath)
+		certs, err := os.ReadFile(opts.CAPath)
 		if err != nil {
 			return fmt.Errorf("failed to load %q, %v", opts.CAPath, err)
 		}
@@ -201,3 +211,5 @@ func parseRedisURLs(urls []string) ([]string, *redis.Options, error) {
 	}
 	return addrs, redisOptions, nil
 }
+
+var _ persistence.Store = (*SessionStore)(nil)

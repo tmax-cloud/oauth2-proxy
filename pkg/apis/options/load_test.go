@@ -3,7 +3,6 @@ package options
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -50,6 +49,7 @@ var _ = Describe("Load", func() {
 		Options: Options{
 			ProxyPrefix:        "/oauth2",
 			PingPath:           "/ping",
+			ReadyPath:          "/ready",
 			RealClientIPHeader: "X-Real-IP",
 			ForceHTTPS:         false,
 			Cookie:             cookieDefaults(),
@@ -118,7 +118,7 @@ var _ = Describe("Load", func() {
 
 				if o.configFile != nil {
 					By("Creating a config file")
-					configFile, err := ioutil.TempFile("", "oauth2-proxy-test-legacy-config-file")
+					configFile, err := os.CreateTemp("", "oauth2-proxy-test-legacy-config-file")
 					Expect(err).ToNot(HaveOccurred())
 					defer configFile.Close()
 
@@ -390,7 +390,7 @@ sub:
 
 				if in.configFile != nil {
 					By("Creating a config file")
-					configFile, err := ioutil.TempFile("", "oauth2-proxy-test-config-file")
+					configFile, err := os.CreateTemp("", "oauth2-proxy-test-config-file")
 					Expect(err).ToNot(HaveOccurred())
 					defer configFile.Close()
 
@@ -488,7 +488,7 @@ injectResponseHeaders:
 `)
 
 		By("Creating a config file")
-		configFile, err := ioutil.TempFile("", "oauth2-proxy-test-alpha-config-file")
+		configFile, err := os.CreateTemp("", "oauth2-proxy-test-alpha-config-file")
 		Expect(err).ToNot(HaveOccurred())
 		defer configFile.Close()
 

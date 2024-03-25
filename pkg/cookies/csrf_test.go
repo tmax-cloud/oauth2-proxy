@@ -23,13 +23,15 @@ var _ = Describe("CSRF Cookie Tests", func() {
 
 	BeforeEach(func() {
 		cookieOpts = &options.Cookie{
-			Name:     cookieName,
-			Secret:   cookieSecret,
-			Domains:  []string{cookieDomain},
-			Path:     cookiePath,
-			Expire:   time.Hour,
-			Secure:   true,
-			HTTPOnly: true,
+			Name:           cookieName,
+			Secret:         cookieSecret,
+			Domains:        []string{cookieDomain},
+			Path:           cookiePath,
+			Expire:         time.Hour,
+			Secure:         true,
+			HTTPOnly:       true,
+			CSRFPerRequest: false,
+			CSRFExpire:     time.Hour,
 		}
 
 		var err error
@@ -160,7 +162,7 @@ var _ = Describe("CSRF Cookie Tests", func() {
 						"; Path=%s; Domain=%s; Expires=%s; HttpOnly; Secure",
 						cookiePath,
 						cookieDomain,
-						testCookieExpires(testNow.Add(cookieOpts.Expire)),
+						testCookieExpires(testNow.Add(cookieOpts.CSRFExpire)),
 					),
 				))
 			})

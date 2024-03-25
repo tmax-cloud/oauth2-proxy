@@ -76,8 +76,8 @@ type Provider struct {
 	Scope string `json:"scope,omitempty"`
 	// AllowedGroups is a list of restrict logins to members of this group
 	AllowedGroups []string `json:"allowedGroups,omitempty"`
-	// The forced code challenge method
-	CodeChallengeMethod string `json:"force_code_challenge_method,omitempty"`
+	// The code challenge method
+	CodeChallengeMethod string `json:"code_challenge_method,omitempty"`
 }
 
 // ProviderType is used to enumerate the different provider type options
@@ -142,6 +142,9 @@ type AzureOptions struct {
 	// Tenant directs to a tenant-specific or common (tenant-independent) endpoint
 	// Default value is 'common'
 	Tenant string `json:"tenant,omitempty"`
+	// GraphGroupField configures the group field to be used when building the groups list from Microsoft Graph
+	// Default value is 'id'
+	GraphGroupField string `json:"graphGroupField,omitempty"`
 }
 
 type ADFSOptions struct {
@@ -186,6 +189,8 @@ type GoogleOptions struct {
 	AdminEmail string `json:"adminEmail,omitempty"`
 	// ServiceAccountJSON is the path to the service account json credentials
 	ServiceAccountJSON string `json:"serviceAccountJson,omitempty"`
+	// UseApplicationDefaultCredentials is a boolean whether to use Application Default Credentials instead of a ServiceAccountJSON
+	UseApplicationDefaultCredentials bool `json:"useApplicationDefaultCredentials,omitempty"`
 }
 
 type OIDCOptions struct {

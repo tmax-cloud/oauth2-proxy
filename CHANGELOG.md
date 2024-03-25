@@ -71,6 +71,33 @@ N/A
 
 ## Changes since v7.3.0
 
+- [#1862](https://github.com/oauth2-proxy/oauth2-proxy/pull/1862) Update dependencies (@JoelSpeed)
+- [#1828](https://github.com/oauth2-proxy/oauth2-proxy/pull/1828) call providerData.setProviderDefaults for oidc provider to achieve consistent behaviour (@centzilius)
+  - UserClaim will be set to sub instead of beeing empty from now on.
+- [#1691](https://github.com/oauth2-proxy/oauth2-proxy/pull/1691) Fix Redis IdleTimeout when Redis timeout option is set to non-zero (@dimss)
+- [#1669](https://github.com/oauth2-proxy/oauth2-proxy/pull/1699) Fix method deprecated error in lint (@t-katsumura)
+- [#1701](https://github.com/oauth2-proxy/oauth2-proxy/pull/1701) Watch the htpasswd file for changes and update the htpasswdMap (@aiciobanu)
+- [#1709](https://github.com/oauth2-proxy/oauth2-proxy/pull/1709) Show an alert message when basic auth credentials are invalid (@aiciobanu)
+- [#1723](https://github.com/oauth2-proxy/oauth2-proxy/pull/1723) Added ability to specify allowed TLS cipher suites. (@crbednarz)
+- [#1720](https://github.com/oauth2-proxy/oauth2-proxy/pull/1720) Extract roles from authToken, to allow using allowed roles with Keycloak. (@MrDeerly )
+- [#1774](https://github.com/oauth2-proxy/oauth2-proxy/pull/1774) Fix vulnerabilities CVE-2022-27191, CVE-2021-44716 and CVE-2022-29526. (@felipeconti)
+- [#1667](https://github.com/oauth2-proxy/oauth2-proxy/issues/1667) Rename configuration file flag for PKCE (@ChrisEke)
+to remain consistent with CLI flags. You should specify `code_challenge_method` in your configuration instead of
+`force_code_challenge_method`.
+- [#1708](https://github.com/oauth2-proxy/oauth2-proxy/pull/1708) Enable different CSRF cookies per request (@miguelborges99)
+  - Add flag "--cookie-csrf-per-request" which activates an algorithm to name CSRF cookies differently per request.
+    This feature allows parallel callbacks and by default it is disabled.
+  - Add flag "--cookie-csrf-expire" to define a different expiration time for the CSRF cookie. By default, it is 15 minutes.
+- [#1762](https://github.com/oauth2-proxy/oauth2-proxy/pull/1762) Support negating for skip auth routes (@ianldge)
+- [#1788](https://github.com/oauth2-proxy/oauth2-proxy/pull/1788) Update base docker image to alpine 3.16 (@tooptoop4)
+- [#1760](https://github.com/oauth2-proxy/oauth2-proxy/pull/1760) Option to configure API routes (@segfault16)
+- [#1825](https://github.com/oauth2-proxy/oauth2-proxy/pull/1825) Fix vulnerabilities CVE-2022-32149 and CVE-2022-27664. (@crbednarz)
+- [#1750](https://github.com/oauth2-proxy/oauth2-proxy/pull/1750) Fix Nextcloud provider (@n1tehawk)
+- [#1574](https://github.com/oauth2-proxy/oauth2-proxy/pull/1574) Add Azure groups support and Azure OAuth v2.0 (@adriananeci)
+- [#1851](https://github.com/oauth2-proxy/oauth2-proxy/pull/1851) Bump golang to 1.19 and min allowed version to 1.18 (@adriananeci)
+- [#1815](https://github.com/oauth2-proxy/oauth2-proxy/pull/1815) Keycloak: save user and preferredUsername in session to populate headers for the backend (@babs)
+- [#1847](https://github.com/oauth2-proxy/oauth2-proxy/pull/1847) Update go-redis/redis to v9 (@arhamGH)
+-
 # V7.3.0
 
 ## Release Highlights
@@ -92,7 +119,7 @@ If you are using an architecture specific tag (ex: v7.2.1-arm64) you should move
 
 ## Breaking Changes
 
-N/A
+- [#1666](https://github.com/oauth2-proxy/oauth2-proxy/issues/1666) Azure provider breaks after upgrading to this version. Please see the issue for more details.
 
 ## Changes since v7.2.1
 

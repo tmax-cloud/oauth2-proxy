@@ -26,15 +26,17 @@ func MakeCookieFromOptions(req *http.Request, name string, value string, opts *o
 	}
 
 	c := &http.Cookie{
-		Name:   name,
-		Value:  value,
-		Path:   opts.Path,
-		Domain: domain,
-		//Expires: time.Time{},
-		Expires:  now.Add(expiration),
+		Name:     name,
+		Value:    value,
+		Path:     opts.Path,
+		Domain:   domain,
 		HttpOnly: opts.HTTPOnly,
 		Secure:   opts.Secure,
 		SameSite: ParseSameSite(opts.SameSite),
+	}
+
+	if expiration != time.Duration(0) {
+		c.Expires = now.Add(expiration)
 	}
 
 	warnInvalidDomain(c, req)

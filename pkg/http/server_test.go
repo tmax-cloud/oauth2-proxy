@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/apis/options"
@@ -261,6 +261,40 @@ var _ = Describe("Server", func() {
 				expectHTTPListener: false,
 				expectTLSListener:  true,
 			}),
+			Entry("with an ipv4 valid https bind address, and valid TLS config with CipherSuites", &newServerTableInput{
+				opts: Opts{
+					Handler:           handler,
+					SecureBindAddress: "127.0.0.1:0",
+					TLS: &options.TLS{
+						Key:  &ipv4KeyDataSource,
+						Cert: &ipv4CertDataSource,
+						CipherSuites: []string{
+							"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+							"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+						},
+					},
+				},
+				expectedErr:        nil,
+				expectHTTPListener: false,
+				expectTLSListener:  true,
+			}),
+			Entry("with an ipv4 valid https bind address, and invalid TLS config with unknown CipherSuites", &newServerTableInput{
+				opts: Opts{
+					Handler:           handler,
+					SecureBindAddress: "127.0.0.1:0",
+					TLS: &options.TLS{
+						Key:  &ipv4KeyDataSource,
+						Cert: &ipv4CertDataSource,
+						CipherSuites: []string{
+							"TLS_RSA_WITH_RC4_64_SHA",
+							"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+						},
+					},
+				},
+				expectedErr:        errors.New("error setting up TLS listener: could not parse cipher suites: unknown TLS cipher suite name specified \"TLS_RSA_WITH_RC4_64_SHA\""),
+				expectHTTPListener: false,
+				expectTLSListener:  true,
+			}),
 			Entry("with an ipv6 valid http bind address", &newServerTableInput{
 				opts: Opts{
 					Handler:     handler,
@@ -454,6 +488,40 @@ var _ = Describe("Server", func() {
 				expectHTTPListener: false,
 				expectTLSListener:  true,
 			}),
+			Entry("with an ipv6 valid https bind address, and valid TLS config with CipherSuites", &newServerTableInput{
+				opts: Opts{
+					Handler:           handler,
+					SecureBindAddress: "[::1]:0",
+					TLS: &options.TLS{
+						Key:  &ipv4KeyDataSource,
+						Cert: &ipv4CertDataSource,
+						CipherSuites: []string{
+							"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+							"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+						},
+					},
+				},
+				expectedErr:        nil,
+				expectHTTPListener: false,
+				expectTLSListener:  true,
+			}),
+			Entry("with an ipv6 valid https bind address, and invalid TLS config with unknown CipherSuites", &newServerTableInput{
+				opts: Opts{
+					Handler:           handler,
+					SecureBindAddress: "[::1]:0",
+					TLS: &options.TLS{
+						Key:  &ipv4KeyDataSource,
+						Cert: &ipv4CertDataSource,
+						CipherSuites: []string{
+							"TLS_RSA_WITH_RC4_64_SHA",
+							"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+						},
+					},
+				},
+				expectedErr:        errors.New("error setting up TLS listener: could not parse cipher suites: unknown TLS cipher suite name specified \"TLS_RSA_WITH_RC4_64_SHA\""),
+				expectHTTPListener: false,
+				expectTLSListener:  true,
+			}),
 		)
 	})
 
@@ -497,7 +565,7 @@ var _ = Describe("Server", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-				body, err := ioutil.ReadAll(resp.Body)
+				body, err := io.ReadAll(resp.Body)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(string(body)).To(Equal(hello))
 			})
@@ -551,7 +619,7 @@ var _ = Describe("Server", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-				body, err := ioutil.ReadAll(resp.Body)
+				body, err := io.ReadAll(resp.Body)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(string(body)).To(Equal(hello))
 			})
@@ -622,7 +690,7 @@ var _ = Describe("Server", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-				body, err := ioutil.ReadAll(resp.Body)
+				body, err := io.ReadAll(resp.Body)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(string(body)).To(Equal(hello))
 			})
@@ -637,7 +705,7 @@ var _ = Describe("Server", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-				body, err := ioutil.ReadAll(resp.Body)
+				body, err := io.ReadAll(resp.Body)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(string(body)).To(Equal(hello))
 			})
@@ -693,7 +761,7 @@ var _ = Describe("Server", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-				body, err := ioutil.ReadAll(resp.Body)
+				body, err := io.ReadAll(resp.Body)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(string(body)).To(Equal(hello))
 			})
@@ -747,7 +815,7 @@ var _ = Describe("Server", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-				body, err := ioutil.ReadAll(resp.Body)
+				body, err := io.ReadAll(resp.Body)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(string(body)).To(Equal(hello))
 			})
@@ -818,7 +886,7 @@ var _ = Describe("Server", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-				body, err := ioutil.ReadAll(resp.Body)
+				body, err := io.ReadAll(resp.Body)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(string(body)).To(Equal(hello))
 			})
@@ -833,7 +901,7 @@ var _ = Describe("Server", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-				body, err := ioutil.ReadAll(resp.Body)
+				body, err := io.ReadAll(resp.Body)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(string(body)).To(Equal(hello))
 			})

@@ -70,6 +70,7 @@ func NewLegacyFlagSet() *pflag.FlagSet {
 	flagSet.AddFlagSet(legacyHeadersFlagSet())
 	flagSet.AddFlagSet(legacyServerFlagset())
 	flagSet.AddFlagSet(legacyProviderFlagSet())
+	flagSet.AddFlagSet(legacyGoogleFlagSet())
 
 	return flagSet
 }
@@ -447,15 +448,16 @@ func getXAuthRequestAccessTokenHeader() Header {
 }
 
 type LegacyServer struct {
-	MetricsAddress       string `flag:"metrics-address" cfg:"metrics_address"`
-	MetricsSecureAddress string `flag:"metrics-secure-address" cfg:"metrics_secure_address"`
-	MetricsTLSCertFile   string `flag:"metrics-tls-cert-file" cfg:"metrics_tls_cert_file"`
-	MetricsTLSKeyFile    string `flag:"metrics-tls-key-file" cfg:"metrics_tls_key_file"`
-	HTTPAddress          string `flag:"http-address" cfg:"http_address"`
-	HTTPSAddress         string `flag:"https-address" cfg:"https_address"`
-	TLSCertFile          string `flag:"tls-cert-file" cfg:"tls_cert_file"`
-	TLSKeyFile           string `flag:"tls-key-file" cfg:"tls_key_file"`
-	TLSMinVersion        string `flag:"tls-min-version" cfg:"tls_min_version"`
+	MetricsAddress       string   `flag:"metrics-address" cfg:"metrics_address"`
+	MetricsSecureAddress string   `flag:"metrics-secure-address" cfg:"metrics_secure_address"`
+	MetricsTLSCertFile   string   `flag:"metrics-tls-cert-file" cfg:"metrics_tls_cert_file"`
+	MetricsTLSKeyFile    string   `flag:"metrics-tls-key-file" cfg:"metrics_tls_key_file"`
+	HTTPAddress          string   `flag:"http-address" cfg:"http_address"`
+	HTTPSAddress         string   `flag:"https-address" cfg:"https_address"`
+	TLSCertFile          string   `flag:"tls-cert-file" cfg:"tls_cert_file"`
+	TLSKeyFile           string   `flag:"tls-key-file" cfg:"tls_key_file"`
+	TLSMinVersion        string   `flag:"tls-min-version" cfg:"tls_min_version"`
+	TLSCipherSuites      []string `flag:"tls-cipher-suite" cfg:"tls_cipher_suites"`
 }
 
 func legacyServerFlagset() *pflag.FlagSet {
@@ -470,6 +472,7 @@ func legacyServerFlagset() *pflag.FlagSet {
 	flagSet.String("tls-cert-file", "", "path to certificate file")
 	flagSet.String("tls-key-file", "", "path to private key file")
 	flagSet.String("tls-min-version", "", "minimal TLS version for HTTPS clients (either \"TLS1.2\" or \"TLS1.3\")")
+	flagSet.StringSlice("tls-cipher-suite", []string{}, "restricts TLS cipher suites to those listed (e.g. TLS_RSA_WITH_RC4_128_SHA) (may be given multiple times)")
 
 	return flagSet
 }
@@ -479,20 +482,22 @@ type LegacyProvider struct {
 	ClientSecret     string `flag:"client-secret" cfg:"client_secret"`
 	ClientSecretFile string `flag:"client-secret-file" cfg:"client_secret_file"`
 
-	KeycloakGroups           []string `flag:"keycloak-group" cfg:"keycloak_groups"`
-	AzureTenant              string   `flag:"azure-tenant" cfg:"azure_tenant"`
-	BitbucketTeam            string   `flag:"bitbucket-team" cfg:"bitbucket_team"`
-	BitbucketRepository      string   `flag:"bitbucket-repository" cfg:"bitbucket_repository"`
-	GitHubOrg                string   `flag:"github-org" cfg:"github_org"`
-	GitHubTeam               string   `flag:"github-team" cfg:"github_team"`
-	GitHubRepo               string   `flag:"github-repo" cfg:"github_repo"`
-	GitHubToken              string   `flag:"github-token" cfg:"github_token"`
-	GitHubUsers              []string `flag:"github-user" cfg:"github_users"`
-	GitLabGroup              []string `flag:"gitlab-group" cfg:"gitlab_groups"`
-	GitLabProjects           []string `flag:"gitlab-project" cfg:"gitlab_projects"`
-	GoogleGroups             []string `flag:"google-group" cfg:"google_group"`
-	GoogleAdminEmail         string   `flag:"google-admin-email" cfg:"google_admin_email"`
-	GoogleServiceAccountJSON string   `flag:"google-service-account-json" cfg:"google_service_account_json"`
+	KeycloakGroups                         []string `flag:"keycloak-group" cfg:"keycloak_groups"`
+	AzureTenant                            string   `flag:"azure-tenant" cfg:"azure_tenant"`
+	AzureGraphGroupField                   string   `flag:"azure-graph-group-field" cfg:"azure_graph_group_field"`
+	BitbucketTeam                          string   `flag:"bitbucket-team" cfg:"bitbucket_team"`
+	BitbucketRepository                    string   `flag:"bitbucket-repository" cfg:"bitbucket_repository"`
+	GitHubOrg                              string   `flag:"github-org" cfg:"github_org"`
+	GitHubTeam                             string   `flag:"github-team" cfg:"github_team"`
+	GitHubRepo                             string   `flag:"github-repo" cfg:"github_repo"`
+	GitHubToken                            string   `flag:"github-token" cfg:"github_token"`
+	GitHubUsers                            []string `flag:"github-user" cfg:"github_users"`
+	GitLabGroup                            []string `flag:"gitlab-group" cfg:"gitlab_groups"`
+	GitLabProjects                         []string `flag:"gitlab-project" cfg:"gitlab_projects"`
+	GoogleGroups                           []string `flag:"google-group" cfg:"google_group"`
+	GoogleAdminEmail                       string   `flag:"google-admin-email" cfg:"google_admin_email"`
+	GoogleServiceAccountJSON               string   `flag:"google-service-account-json" cfg:"google_service_account_json"`
+	GoogleUseApplicationDefaultCredentials bool     `flag:"google-use-application-default-credentials" cfg:"google_use_application_default_credentials"`
 
 	// These options allow for other providers besides Google, with
 	// potential overrides.
@@ -526,7 +531,9 @@ type LegacyProvider struct {
 	JWTKeyFile string `flag:"jwt-key-file" cfg:"jwt_key_file"`
 	PubJWKURL  string `flag:"pubjwk-url" cfg:"pubjwk_url"`
 	// PKCE Code Challenge method to use (either S256 or plain)
-	CodeChallengeMethod string `flag:"code-challenge-method" cfg:"force_code_challenge_method"`
+	CodeChallengeMethod string `flag:"code-challenge-method" cfg:"code_challenge_method"`
+	// Provided for legacy reasons, to be dropped in newer version see #1667
+	ForceCodeChallengeMethod string `flag:"force-code-challenge-method" cfg:"force_code_challenge_method"`
 }
 
 func legacyProviderFlagSet() *pflag.FlagSet {
@@ -534,6 +541,7 @@ func legacyProviderFlagSet() *pflag.FlagSet {
 
 	flagSet.StringSlice("keycloak-group", []string{}, "restrict logins to members of these groups (may be given multiple times)")
 	flagSet.String("azure-tenant", "common", "go to a tenant-specific or common (tenant-independent) endpoint.")
+	flagSet.String("azure-graph-group-field", "", "configures the group field to be used when building the groups list(`id` or `displayName`. Default is `id`) from Microsoft Graph(available only for v2.0 oidc url). Based on this value, the `allowed-group` config values should be adjusted accordingly. If using `id` as group field, `allowed-group` should contains groups IDs, if using `displayName` as group field, `allowed-group` should contains groups name")
 	flagSet.String("bitbucket-team", "", "restrict logins to members of this team")
 	flagSet.String("bitbucket-repository", "", "restrict logins to user with access to this repository")
 	flagSet.String("github-org", "", "restrict logins to members of this organisation")
@@ -543,9 +551,6 @@ func legacyProviderFlagSet() *pflag.FlagSet {
 	flagSet.StringSlice("github-user", []string{}, "allow users with these usernames to login even if they do not belong to the specified org and team or collaborators (may be given multiple times)")
 	flagSet.StringSlice("gitlab-group", []string{}, "restrict logins to members of this group (may be given multiple times)")
 	flagSet.StringSlice("gitlab-project", []string{}, "restrict logins to members of this project (may be given multiple times) (eg `group/project=accesslevel`). Access level should be a value matching Gitlab access levels (see https://docs.gitlab.com/ee/api/members.html#valid-access-levels), defaulted to 20 if absent")
-	flagSet.StringSlice("google-group", []string{}, "restrict logins to members of this google group (may be given multiple times).")
-	flagSet.String("google-admin-email", "", "the google admin to impersonate for api calls")
-	flagSet.String("google-service-account-json", "", "the path to the service account json credentials")
 	flagSet.String("client-id", "", "the OAuth Client ID: ie: \"123456.apps.googleusercontent.com\"")
 	flagSet.String("client-secret", "", "the OAuth Client Secret")
 	flagSet.String("client-secret-file", "", "the file with OAuth Client Secret")
@@ -572,6 +577,7 @@ func legacyProviderFlagSet() *pflag.FlagSet {
 	flagSet.String("prompt", "", "OIDC prompt")
 	flagSet.String("approval-prompt", "force", "OAuth approval_prompt")
 	flagSet.String("code-challenge-method", "", "use PKCE code challenges with the specified method. Either 'plain' or 'S256'")
+	flagSet.String("force-code-challenge-method", "", "Deprecated - use --code-challenge-method")
 
 	flagSet.String("acr-values", "", "acr values string:  optional")
 	flagSet.String("jwt-key", "", "private key in PEM format used to sign JWT, so that you can say something like -jwt-key=\"${OAUTH2_PROXY_JWT_KEY}\": required by login.gov")
@@ -581,6 +587,17 @@ func legacyProviderFlagSet() *pflag.FlagSet {
 	flagSet.String("user-id-claim", OIDCEmailClaim, "(DEPRECATED for `oidc-email-claim`) which claim contains the user ID")
 	flagSet.StringSlice("allowed-group", []string{}, "restrict logins to members of this group (may be given multiple times)")
 	flagSet.StringSlice("allowed-role", []string{}, "(keycloak-oidc) restrict logins to members of these roles (may be given multiple times)")
+
+	return flagSet
+}
+
+func legacyGoogleFlagSet() *pflag.FlagSet {
+	flagSet := pflag.NewFlagSet("google", pflag.ExitOnError)
+
+	flagSet.StringSlice("google-group", []string{}, "restrict logins to members of this google group (may be given multiple times).")
+	flagSet.String("google-admin-email", "", "the google admin to impersonate for api calls")
+	flagSet.String("google-service-account-json", "", "the path to the service account json credentials")
+	flagSet.String("google-use-application-default-credentials", "", "use application default credentials instead of service account json (i.e. GKE Workload Identity)")
 
 	return flagSet
 }
@@ -599,6 +616,9 @@ func (l LegacyServer) convert() (Server, Server) {
 				FromFile: l.TLSCertFile,
 			},
 			MinVersion: l.TLSMinVersion,
+		}
+		if len(l.TLSCipherSuites) != 0 {
+			appServer.TLS.CipherSuites = l.TLSCipherSuites
 		}
 		// Preserve backwards compatibility, only run one server
 		appServer.BindAddress = ""
@@ -660,10 +680,16 @@ func (l *LegacyProvider) convert() (Providers, error) {
 		ExtraAudiences:                 l.OIDCExtraAudiences,
 	}
 
+	// Support for legacy configuration option
+	if l.ForceCodeChallengeMethod != "" && l.CodeChallengeMethod == "" {
+		provider.CodeChallengeMethod = l.ForceCodeChallengeMethod
+	}
+
 	// This part is out of the switch section because azure has a default tenant
 	// that needs to be added from legacy options
 	provider.AzureConfig = AzureOptions{
-		Tenant: l.AzureTenant,
+		Tenant:          l.AzureTenant,
+		GraphGroupField: l.AzureGraphGroupField,
 	}
 
 	switch provider.Type {
@@ -702,9 +728,10 @@ func (l *LegacyProvider) convert() (Providers, error) {
 		}
 	case "google":
 		provider.GoogleConfig = GoogleOptions{
-			Groups:             l.GoogleGroups,
-			AdminEmail:         l.GoogleAdminEmail,
-			ServiceAccountJSON: l.GoogleServiceAccountJSON,
+			Groups:                           l.GoogleGroups,
+			AdminEmail:                       l.GoogleAdminEmail,
+			ServiceAccountJSON:               l.GoogleServiceAccountJSON,
+			UseApplicationDefaultCredentials: l.GoogleUseApplicationDefaultCredentials,
 		}
 	}
 
