@@ -45,6 +45,9 @@ func (p *OAuthProxy) HyperauthGroupList(rw http.ResponseWriter, req *http.Reques
 
 	// get iss
 	tokenByteArr, err := jwt.DecodeSegment(strings.Split(session.AccessToken, ".")[1])
+	if err != nil {
+		logger.Errorf("Failed to get iss")
+	}
 	var decodedTokenMap map[string]interface{}
 	json.Unmarshal(tokenByteArr, &decodedTokenMap)
 	issuer := decodedTokenMap["iss"].(string)
@@ -186,6 +189,9 @@ func (p *OAuthProxy) TokenInfo(rw http.ResponseWriter, req *http.Request) {
 
 	// get playload from accesstoken
 	tokenByteArr, err := jwt.DecodeSegment(strings.Split(session.AccessToken, ".")[1])
+	if err != nil {
+		logger.Errorf("Failed to get access token")
+	}
 	var decodedTokenMap map[string]interface{}
 	json.Unmarshal(tokenByteArr, &decodedTokenMap)
 
